@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jogo de Treino de Mira</title>
+    <title>Jogo de Treino de Mira (Estilo CS)</title>
     <style>
         body, html { margin: 0; overflow: hidden; height: 100%; }
         canvas { display: block; }
@@ -19,6 +19,7 @@
         let cameraRotationSpeed = 0.005;
         let movementSmoothness = 0.1; // Suavizar movimento
         let targetSpeed = 0.05; // Velocidade dos alvos
+        let bulletsLeft = 30; // Contador de balas
 
         // Função para iniciar o jogo
         function init() {
@@ -31,12 +32,29 @@
             document.body.appendChild(renderer.domElement);
 
             // Fundo da sala (parede cinza)
-            let wallGeometry = new THREE.BoxGeometry(50, 30, 1);
-            let wallMaterial = new THREE.MeshBasicMaterial({ color: 0x808080, side: THREE.DoubleSide });
-            let wall = new THREE.Mesh(wallGeometry, wallMaterial);
-            wall.position.z = -15;
-            scene.add(wall);
+            let floorGeometry = new THREE.PlaneGeometry(100, 100);
+            let floorMaterial = new THREE.MeshBasicMaterial({ color: 0xCCCCCC, side: THREE.DoubleSide });
+            let floor = new THREE.Mesh(floorGeometry, floorMaterial);
+            floor.rotation.x = Math.PI / -2;
+            scene.add(floor);
 
+            // Paredes laterais
+            let wallMaterial = new THREE.MeshBasicMaterial({ color: 0x808080, side: THREE.DoubleSide });
+            let wallLeft = new THREE.Mesh(new THREE.PlaneGeometry(50, 30), wallMaterial);
+            wallLeft.position.set(-25, 0, -15);
+            wallLeft.rotation.y = Math.PI / 2;
+            scene.add(wallLeft);
+            
+            let wallRight = new THREE.Mesh(new THREE.PlaneGeometry(50, 30), wallMaterial);
+            wallRight.position.set(25, 0, -15);
+            wallRight.rotation.y = -Math.PI / 2;
+            scene.add(wallRight);
+            
+            let wallFront = new THREE.Mesh(new THREE.PlaneGeometry(50, 30), wallMaterial);
+            wallFront.position.set(0, 15, -30);
+            wallFront.rotation.x = Math.PI / 2;
+            scene.add(wallFront);
+            
             // Criar a pistola (uma geometria simples)
             let pistol = createPistol();
             scene.add(pistol);
@@ -60,13 +78,22 @@
             scoreElement.style.fontSize = '20px';
             document.body.appendChild(scoreElement);
 
+            // Contador de balas
+            let bulletsElement = document.createElement('div');
+            bulletsElement.style.position = 'absolute';
+            bulletsElement.style.top = '40px';
+            bulletsElement.style.left = '10px';
+            bulletsElement.style.color = 'white';
+            bulletsElement.style.fontSize = '20px';
+            document.body.appendChild(bulletsElement);
+
             // Detectar movimento do mouse
             document.addEventListener('mousemove', onMouseMove, false);
             document.addEventListener('mousedown', onMouseDown, false);
             document.addEventListener('keydown', onKeyDown, false);
             document.addEventListener('keyup', onKeyUp, false);
 
-            animate(scoreElement);
+            animate(scoreElement, bulletsElement);
         }
 
         // Função para criar uma pistola simples (Glock 19)
@@ -107,8 +134,8 @@
         }
 
         // Função de animação (loop)
-        function animate(scoreElement) {
-            requestAnimationFrame(() => animate(scoreElement));
+        function animate(scoreElement, bulletsElement) {
+            requestAnimationFrame(() => animate(scoreElement, bulletsElement));
 
             let delta = clock.getDelta(); // tempo entre frames
 
@@ -132,6 +159,9 @@
             // Atualiza a pontuação
             scoreElement.innerHTML = 'Pontuação: ' + score;
 
+            // Atualiza o contador de balas
+            bulletsElement.innerHTML = 'Balas: ' + bulletsLeft;
+
             // Atualiza a cena
             renderer.render(scene, camera);
         }
@@ -151,34 +181,9 @@
 
         // Detecta o clique com o botão direito do mouse para "atirar"
         function onMouseDown(event) {
-            if (event.button === 2) { // Botão direito do mouse
+            if (event.button === 2 && bulletsLeft > 0) { // Botão direito do mouse
+                bulletsLeft--;
                 targets.forEach((target, index) => {
                     if (isTargetInCrosshairs(target)) {
                         target.visible = false; // Remove o alvo
-                        score++; // Incrementa a pontuação
-                    }
-                });
-            }
-        }
-
-        // Verifica se o alvo está no ponto de mira
-        function isTargetInCrosshairs(target) {
-            let targetPosition = target.position.clone().project(camera);
-            return Math.abs(targetPosition.x) < 0.1 && Math.abs(targetPosition.y) < 0.1;
-        }
-
-        // Controle de teclas pressionadas
-        let keyState = {};
-        function onKeyDown(event) {
-            keyState[event.key] = true;
-        }
-
-        function onKeyUp(event) {
-            keyState[event.key] = false;
-        }
-
-        // Inicializa o jogo
-        init();
-    </script>
-</body>
-</html>
+                        score++;
