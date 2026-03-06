@@ -3,115 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jogo da Cobrinha</title>
+    <title>Jogo FPS Básico</title>
     <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f4f4f4;
-            margin: 0;
-            font-family: Arial, sans-serif;
-        }
-        canvas {
-            background-color: #000;
-            border: 1px solid #fff;
-        }
+        body, html { margin: 0; overflow: hidden; height: 100%; }
+        canvas { display: block; }
     </style>
 </head>
 <body>
-    <canvas id="gameCanvas" width="400" height="400"></canvas>
-    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
     <script>
-        const canvas = document.getElementById("gameCanvas");
-        const ctx = canvas.getContext("2d");
+        let scene, camera, renderer, cube;
+        let clock = new THREE.Clock();
+        let playerSpeed = 0.1;
+        let cameraRotationSpeed = 0.01;
 
-        const gridSize = 20;
-        let snake = [{ x: 160, y: 160 }];
-        let food = { x: 80, y: 80 };
-        let dx = gridSize;
-        let dy = 0;
-        let gameOver = false;
+        // Função para iniciar o jogo
+        function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-        function drawSnake() {
-            snake.forEach(segment => {
-                ctx.fillStyle = "#00FF00";
-                ctx.fillRect(segment.x, segment.y, gridSize, gridSize);
-            });
+            // Renderizador WebGL
+            renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            // Criar um cubo como "alvo"
+            let geometry = new THREE.BoxGeometry();
+            let material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+            cube = new THREE.Mesh(geometry, material);
+            scene.add(cube);
+
+            // Posicionar a câmera
+            camera.position.z = 5;
+
+            // Detectar movimento do mouse
+            document.addEventListener('mousemove', onMouseMove, false);
+            document.addEventListener('keydown', onKeyDown, false);
+            document.addEventListener('keyup', onKeyUp, false);
+
+            animate();
         }
 
-        function drawFood() {
-            ctx.fillStyle = "#FF0000";
-            ctx.fillRect(food.x, food.y, gridSize, gridSize);
-        }
+        // Função de animação (loop)
+        function animate() {
+            requestAnimationFrame(animate);
 
-        function moveSnake() {
-            const head = { x: snake[0].x + dx, y: snake[0].y + dy };
-            snake.unshift(head);
+            let delta = clock.getDelta(); // tempo entre frames
 
-            if (head.x === food.x && head.y === food.y) {
-                food = generateFood();
-            } else {
-                snake.pop();
+            // Atualizar a posição da câmera
+            if (keyState["ArrowUp"]) {
+                camera.position.z -= playerSpeed;
             }
-        }
-
-        function generateFood() {
-            const x = Math.floor(Math.random() * (canvas.width / gridSize)) * gridSize;
-            const y = Math.floor(Math.random() * (canvas.height / gridSize)) * gridSize;
-            return { x, y };
-        }
-
-        function checkCollision() {
-            const head = snake[0];
-
-            // Colisão com as bordas
-            if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height) {
-                gameOver = true;
+            if (keyState["ArrowDown"]) {
+                camera.position.z += playerSpeed;
             }
-
-            // Colisão com o corpo
-            for (let i = 1; i < snake.length; i++) {
-                if (head.x === snake[i].x && head.y === snake[i].y) {
-                    gameOver = true;
-                }
+            if (keyState["ArrowLeft"]) {
+                camera.rotation.y += cameraRotationSpeed;
             }
-        }
-
-        function gameLoop() {
-            if (gameOver) {
-                alert("Game Over!");
-                document.location.reload();
-                return;
+            if (keyState["ArrowRight"]) {
+                camera.rotation.y -= cameraRotationSpeed;
             }
 
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawSnake();
-            drawFood();
-            moveSnake();
-            checkCollision();
+            // Atualiza a cena
+            renderer.render(scene, camera);
         }
 
-        function changeDirection(event) {
-            if (event.key === "ArrowUp" && dy === 0) {
-                dx = 0;
-                dy = -gridSize;
-            } else if (event.key === "ArrowDown" && dy === 0) {
-                dx = 0;
-                dy = gridSize;
-            } else if (event.key === "ArrowLeft" && dx === 0) {
-                dx = -gridSize;
-                dy = 0;
-            } else if (event.key === "ArrowRight" && dx === 0) {
-                dx = gridSize;
-                dy = 0;
-            }
+        // Movimentação do mouse (controle da direção da câmera)
+        let mouseX = 0;
+        let mouseY = 0;
+        function onMouseMove(event) {
+            mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+            mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+            camera.rotation.x = mouseY * Math.PI;
+            camera.rotation.y = mouseX * Math.PI;
         }
 
-        document.addEventListener("keydown", changeDirection);
+        // Controle de teclas pressionadas
+        let keyState = {};
+        function onKeyDown(event) {
+            keyState[event.key] = true;
+        }
 
-        setInterval(gameLoop, 100);
+        function onKeyUp(event) {
+            keyState[event.key] = false;
+        }
+
+        // Inicializa o jogo
+        init();
     </script>
 </body>
 </html>
