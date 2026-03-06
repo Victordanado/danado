@@ -31,14 +31,14 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
 
-            // Fundo da sala (parede cinza)
+            // Criar o chão (plano cinza)
             let floorGeometry = new THREE.PlaneGeometry(100, 100);
             let floorMaterial = new THREE.MeshBasicMaterial({ color: 0xCCCCCC, side: THREE.DoubleSide });
             let floor = new THREE.Mesh(floorGeometry, floorMaterial);
-            floor.rotation.x = Math.PI / -2;
+            floor.rotation.x = Math.PI / -2; // Deixa o plano paralelo ao chão
             scene.add(floor);
 
-            // Paredes laterais
+            // Criar as paredes (simulando uma sala)
             let wallMaterial = new THREE.MeshBasicMaterial({ color: 0x808080, side: THREE.DoubleSide });
             let wallLeft = new THREE.Mesh(new THREE.PlaneGeometry(50, 30), wallMaterial);
             wallLeft.position.set(-25, 0, -15);
@@ -54,7 +54,7 @@
             wallFront.position.set(0, 15, -30);
             wallFront.rotation.x = Math.PI / 2;
             scene.add(wallFront);
-            
+
             // Criar a pistola (uma geometria simples)
             let pistol = createPistol();
             scene.add(pistol);
@@ -69,7 +69,7 @@
             // Posicionar a câmera
             camera.position.z = 5;
 
-            // Pontuação
+            // Elementos de HUD (pontuação e contador de balas)
             let scoreElement = document.createElement('div');
             scoreElement.style.position = 'absolute';
             scoreElement.style.top = '10px';
@@ -78,7 +78,6 @@
             scoreElement.style.fontSize = '20px';
             document.body.appendChild(scoreElement);
 
-            // Contador de balas
             let bulletsElement = document.createElement('div');
             bulletsElement.style.position = 'absolute';
             bulletsElement.style.top = '40px';
@@ -87,7 +86,7 @@
             bulletsElement.style.fontSize = '20px';
             document.body.appendChild(bulletsElement);
 
-            // Detectar movimento do mouse
+            // Detectar movimento do mouse e clicar
             document.addEventListener('mousemove', onMouseMove, false);
             document.addEventListener('mousedown', onMouseDown, false);
             document.addEventListener('keydown', onKeyDown, false);
@@ -186,4 +185,30 @@
                 targets.forEach((target, index) => {
                     if (isTargetInCrosshairs(target)) {
                         target.visible = false; // Remove o alvo
-                        score++;
+                        score++; // Incrementa a pontuação
+                    }
+                });
+            }
+        }
+
+        // Verifica se o alvo está no ponto de mira
+        function isTargetInCrosshairs(target) {
+            let targetPosition = target.position.clone().project(camera);
+            return Math.abs(targetPosition.x) < 0.1 && Math.abs(targetPosition.y) < 0.1;
+        }
+
+        // Controle de teclas pressionadas
+        let keyState = {};
+        function onKeyDown(event) {
+            keyState[event.key] = true;
+        }
+
+        function onKeyUp(event) {
+            keyState[event.key] = false;
+        }
+
+        // Inicializa o jogo
+        init();
+    </script>
+</body>
+</html>
