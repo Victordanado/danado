@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jogo FPS Básico</title>
+    <title>Jogo de Treino de Mira</title>
     <style>
         body, html { margin: 0; overflow: hidden; height: 100%; }
         canvas { display: block; }
@@ -13,7 +13,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
     <script>
-        let scene, camera, renderer, cube;
+        let scene, camera, renderer, targets = [];
         let clock = new THREE.Clock();
         let playerSpeed = 0.1;
         let cameraRotationSpeed = 0.01;
@@ -28,11 +28,12 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
 
-            // Criar um cubo como "alvo"
-            let geometry = new THREE.BoxGeometry();
-            let material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-            cube = new THREE.Mesh(geometry, material);
-            scene.add(cube);
+            // Criar a cena com os alvos (bolinhas azuis)
+            for (let i = 0; i < 5; i++) {
+                let target = createTarget();
+                scene.add(target);
+                targets.push(target);
+            }
 
             // Posicionar a câmera
             camera.position.z = 5;
@@ -43,6 +44,21 @@
             document.addEventListener('keyup', onKeyUp, false);
 
             animate();
+        }
+
+        // Função para criar um alvo (bolinha azul)
+        function createTarget() {
+            let geometry = new THREE.SphereGeometry(0.5, 32, 32);
+            let material = new THREE.MeshBasicMaterial({ color: 0x0000ff });
+            let target = new THREE.Mesh(geometry, material);
+            
+            // Posicionamento aleatório do alvo na cena
+            target.position.set(
+                Math.random() * 10 - 5, 
+                Math.random() * 10 - 5, 
+                Math.random() * 10 - 5
+            );
+            return target;
         }
 
         // Função de animação (loop)
@@ -59,11 +75,18 @@
                 camera.position.z += playerSpeed;
             }
             if (keyState["ArrowLeft"]) {
-                camera.rotation.y += cameraRotationSpeed;
-            }
-            if (keyState["ArrowRight"]) {
                 camera.rotation.y -= cameraRotationSpeed;
             }
+            if (keyState["ArrowRight"]) {
+                camera.rotation.y += cameraRotationSpeed;
+            }
+
+            // Movimentar alvos
+            targets.forEach(target => {
+                target.position.x += (Math.random() - 0.5) * 0.1;
+                target.position.y += (Math.random() - 0.5) * 0.1;
+                target.position.z += (Math.random() - 0.5) * 0.1;
+            });
 
             // Atualiza a cena
             renderer.render(scene, camera);
@@ -76,7 +99,7 @@
             mouseX = (event.clientX / window.innerWidth) * 2 - 1;
             mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
             camera.rotation.x = mouseY * Math.PI;
-            camera.rotation.y = mouseX * Math.PI;
+            camera.rotation.y = -mouseX * Math.PI; // Inverte o giro horizontal
         }
 
         // Controle de teclas pressionadas
