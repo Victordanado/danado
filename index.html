@@ -1,214 +1,517 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jogo de Treino de Mira (Estilo CS)</title>
+    <title>COSMO</title>
     <style>
-        body, html { margin: 0; overflow: hidden; height: 100%; }
-        canvas { display: block; }
+        /* Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #111;
+            color: #E0D0FF;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+            position: relative;
+            padding-bottom: 100px; /* Espaço extra para o footer */
+        }
+        /* Fundo animado de estrelas */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 200%;
+            height: 200%;
+            background: url('https://www.transparenttextures.com/patterns/stardust.png') repeat;
+            background-size: 200px 200px;
+            animation: starMove 120s linear infinite;
+            z-index: -1;
+        }
+        @keyframes starMove {
+            from { transform: translate(0, 0); }
+            to { transform: translate(-100px, -100px); }
+        }
+        a {
+            color: #BB88FF;
+            text-decoration: none;
+            transition: color 0.3s, transform 0.3s;
+        }
+        a:hover {
+            color: #FFAAFF;
+            transform: scale(1.05);
+        }
+        /* Header */
+        header {
+            text-align: center;
+            padding: 100px 20px;
+            background: linear-gradient(135deg, #4B0082, #800080);
+            position: relative;
+            overflow: hidden;
+            border-bottom: 5px solid #BB88FF;
+        }
+        header h1 {
+            font-size: 6rem;
+            color: #FFFFFF;
+            text-shadow: 0 0 30px #BB88FF, 0 0 80px #FFAAFF;
+            animation: glow 2s infinite alternate;
+        }
+        @keyframes glow {
+            from { text-shadow: 0 0 30px #BB88FF, 0 0 60px #FFAAFF; }
+            to { text-shadow: 0 0 80px #BB88FF, 0 0 120px #FFAAFF; }
+        }
+        /* Navegação rápida */
+        nav {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 10;
+        }
+        nav a {
+            background: rgba(75,0,130,0.7);
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            transition: background 0.3s, transform 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        nav a:hover {
+            background: rgba(138,43,226,0.8);
+            transform: scale(1.1);
+            box-shadow: 0 8px 10px rgba(0, 0, 0, 0.5);
+        }
+        /* Seções */
+        section {
+            padding: 100px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-start;
+            background: rgba(0,0,0,0.85);
+        }
+        article {
+            max-width: 900px;
+            margin: 30px;
+            background: rgba(40,0,40,0.4);
+            padding: 35px;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(128,0,128,0.5);
+            transition: transform 0.5s, box-shadow 0.5s;
+        }
+        article:hover {
+            transform: translateY(-15px) rotateY(5deg);
+            box-shadow: 0 0 60px rgba(255,0,255,0.8);
+        }
+        article img {
+            width: 100%;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 30px rgba(128,0,128,0.7);
+            transition: transform 0.5s;
+        }
+        article img:hover {
+            transform: scale(1.07) rotate(2deg);
+        }
+        h2 {
+            color: #DDA0DD;
+            font-size: 3rem;
+            margin-bottom: 20px;
+            text-align: center;
+            animation: fadeInText 1.5s ease-in-out;
+        }
+        p {
+            font-size: 1.3rem;
+            text-align: justify;
+            animation: fadeInText 2s ease-in-out;
+        }
+        @keyframes fadeInText {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 50px 20px;
+            background-color: #111;
+            color: #888;
+            font-size: 1.2rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        /* Cursor roxo neon */
+        * {
+            cursor: none;
+        }
+        .cursor-neon {
+            position: fixed;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #a020f0;
+            box-shadow:
+                0 0 5px #a020f0,
+                0 0 10px #a020f0,
+                0 0 20px #a020f0,
+                0 0 40px #a020f0;
+            pointer-events: none;
+            z-index: 9999;
+        }
+        /* Responsividade */
+        @media (max-width: 1024px) {
+            header h1 { font-size: 4.5rem; }
+            article { margin: 20px; }
+        }
+        @media (max-width: 768px) {
+            header h1 { font-size: 3.5rem; }
+            section { padding: 60px 10px; }
+            article { margin: 20px 0; }
+        }
+        @media (max-width: 480px) {
+            header h1 { font-size: 3rem; }
+            h2 { font-size: 2rem; }
+            p { font-size: 1rem; }
+        }
+
+        /* ──────────────────────────────────────────────── */
+        /* ESTRELAS ROXAS, METEOROS, FOGUETE (já existentes) */
+        /* ──────────────────────────────────────────────── */
+        .stars-purple {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: -1;
+        }
+        .stars-purple::before,
+        .stars-purple::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: transparent;
+            box-shadow: 
+                120px 180px 2px #DDA0DD,
+                340px 90px 1px #BB88FF,
+                580px 420px 2px #FFAAFF,
+                720px 150px 3px #C71585,
+                950px 380px 1px #9370DB,
+                1100px 550px 2px #BA55D3,
+                80px 650px 1px #EE82EE,
+                260px 780px 2px #FF69B4,
+                1300px 120px 2px #DDA0DD,
+                1450px 400px 1px #BB88FF,
+                300px 200px 3px #D8BFD8,
+                900px 700px 2px #DA70D6;
+            opacity: 0.6;
+            animation: twinkle 6s infinite alternate;
+        }
+        .stars-purple::after {
+            animation-delay: 3s;
+            transform: scale(1.05);
+        }
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.9; }
+        }
+        .meteor {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            background: #FFAAFF;
+            border-radius: 50%;
+            box-shadow: 
+                0 0 15px #FF69B4,
+                0 0 35px #C71585,
+                0 0 60px #800080;
+            pointer-events: none;
+            z-index: -1;
+            animation: meteor-fall linear infinite;
+        }
+        @keyframes meteor-fall {
+            0% {
+                transform: translate(-50px, -100vh) rotate(40deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(120vw, 120vh) rotate(40deg);
+                opacity: 0;
+            }
+        }
+        .rocket {
+            position: fixed;
+            font-size: 55px;
+            transform: rotate(-25deg);
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0;
+            animation: rocket-fly 30s linear infinite;
+        }
+        .rocket::before {
+            content: "🚀";
+            filter: hue-rotate(210deg) saturate(2) brightness(1.2);
+        }
+        @keyframes rocket-fly {
+            0% {
+                left: -20%;
+                top: 15%;
+                opacity: 0;
+            }
+            4% { opacity: 1; }
+            28% { opacity: 1; }
+            32% { opacity: 0; }
+            100% {
+                left: 115%;
+                top: 55%;
+            }
+        }
+
+        /* ──────────────────────────────────────────────── */
+        /* CALENDÁRIO NO CANTO SUPERIOR ESQUERDO             */
+        /* ──────────────────────────────────────────────── */
+        .calendar-container {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 9;
+            background: rgba(75, 0, 130, 0.7);
+            border-radius: 12px;
+            padding: 12px 16px;
+            box-shadow: 0 4px 15px rgba(187, 136, 255, 0.4);
+            border: 1px solid #BB88FF;
+            min-width: 220px;
+            backdrop-filter: blur(5px);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .calendar-container:hover {
+            transform: scale(1.03);
+            box-shadow: 0 8px 25px rgba(187, 136, 255, 0.6);
+        }
+        .calendar-header {
+            text-align: center;
+            color: #FFAAFF;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+            text-shadow: 0 0 8px #BB88FF;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            font-size: 0.9rem;
+        }
+        .calendar-day-name {
+            text-align: center;
+            color: #DDA0DD;
+            font-weight: bold;
+            padding: 4px 0;
+        }
+        .calendar-day {
+            text-align: center;
+            padding: 6px 0;
+            border-radius: 6px;
+        }
+        .calendar-day.today {
+            background: #BB88FF;
+            color: #111;
+            font-weight: bold;
+            box-shadow: 0 0 12px #FFAAFF;
+        }
+        .calendar-day.empty {
+            background: transparent;
+        }
+        @media (max-width: 768px) {
+            .calendar-container {
+                left: 10px;
+                top: 10px;
+                padding: 10px 12px;
+                min-width: 180px;
+                font-size: 0.85rem;
+            }
+        }
     </style>
 </head>
 <body>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<nav>
+    <a href="#galaxias">Galáxias</a>
+    <a href="#buracos">Buracos Negros</a>
+    <a href="#estrelas">Estrelas</a>
+    <a href="#planetas">Planetas</a>
+    <a href="#nebulosas">Nebulosas</a>
+    <a href="#supernovas">Supernovas</a>
+</nav>
+<header>
+    <h1>COSMO</h1>
+</header>
 
-    <script>
-        let scene, camera, renderer, targets = [], score = 0;
-        let clock = new THREE.Clock();
-        let playerSpeed = 0.1;
-        let cameraRotationSpeed = 0.005;
-        let movementSmoothness = 0.1; // Suavizar movimento
-        let targetSpeed = 0.05; // Velocidade dos alvos
-        let bulletsLeft = 30; // Contador de balas
+<!-- Estrelas roxas extras no fundo -->
+<div class="stars-purple"></div>
 
-        // Função para iniciar o jogo
-        function init() {
-            scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+<!-- Meteoros roxos -->
+<div class="meteor" style="left: 5%; animation-duration: 3.5s; animation-delay: 1s;"></div>
+<div class="meteor" style="left: 25%; animation-duration: 5s; animation-delay: 6s;"></div>
+<div class="meteor" style="left: 50%; animation-duration: 4s; animation-delay: 12s;"></div>
+<div class="meteor" style="left: 75%; animation-duration: 6s; animation-delay: 20s;"></div>
+<div class="meteor" style="left: 40%; animation-duration: 4.8s; animation-delay: 30s;"></div>
 
-            // Renderizador WebGL
-            renderer = new THREE.WebGLRenderer();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            document.body.appendChild(renderer.domElement);
+<!-- Foguete roxo -->
+<div class="rocket" style="animation-delay: 5s;"></div>
+<div class="rocket" style="animation-delay: 35s; animation-duration: 28s; top: 35%;"></div>
 
-            // Criar o chão (plano cinza)
-            let floorGeometry = new THREE.PlaneGeometry(100, 100);
-            let floorMaterial = new THREE.MeshBasicMaterial({ color: 0xCCCCCC, side: THREE.DoubleSide });
-            let floor = new THREE.Mesh(floorGeometry, floorMaterial);
-            floor.rotation.x = Math.PI / -2; // Deixa o plano paralelo ao chão
-            scene.add(floor);
+<!-- CALENDÁRIO NO CANTO SUPERIOR ESQUERDO -->
+<div class="calendar-container" id="calendar"></div>
 
-            // Criar as paredes (simulando uma sala)
-            let wallMaterial = new THREE.MeshBasicMaterial({ color: 0x808080, side: THREE.DoubleSide });
-            let wallLeft = new THREE.Mesh(new THREE.PlaneGeometry(50, 30), wallMaterial);
-            wallLeft.position.set(-25, 0, -15);
-            wallLeft.rotation.y = Math.PI / 2;
-            scene.add(wallLeft);
-            
-            let wallRight = new THREE.Mesh(new THREE.PlaneGeometry(50, 30), wallMaterial);
-            wallRight.position.set(25, 0, -15);
-            wallRight.rotation.y = -Math.PI / 2;
-            scene.add(wallRight);
-            
-            let wallFront = new THREE.Mesh(new THREE.PlaneGeometry(50, 30), wallMaterial);
-            wallFront.position.set(0, 15, -30);
-            wallFront.rotation.x = Math.PI / 2;
-            scene.add(wallFront);
+<!-- Seção 1: Galáxias -->
+<section id="galaxias">
+    <article>
+        <img src="https://apod.nasa.gov/apod/image/2103/NGC1300_Hubble_960.jpg" alt="Galáxia Espiral NGC 1300">
+        <h2>Galáxias</h2>
+        <p>Galáxias são enormes conjuntos de estrelas, gás, poeira e matéria escura ligados pela gravidade. A NGC 1300 é uma galáxia espiral com braços impressionantes que giram em torno de um núcleo brilhante, mostrando a complexidade do cosmos.</p>
+        <a href="https://www.nasa.gov/mission_pages/hubble/main/index.html" target="_blank">Explore mais sobre Galáxias na NASA</a>
+    </article>
+</section>
+<!-- Seção 2: Buracos Negros -->
+<section id="buracos">
+    <article>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/4/4c/Black_Hole_Milky_Way.jpg" alt="Ilustração de um Buraco Negro">
+        <h2>Buracos Negros</h2>
+        <p>Buracos negros são regiões do espaço com gravidade tão intensa que nada, nem mesmo a luz, consegue escapar. Eles se formam quando estrelas massivas colapsam ao final de suas vidas, criando um dos objetos mais misteriosos do universo.</p>
+        <a href="https://www.nasa.gov/mission_pages/chandra/main/index.html" target="_blank">Explore mais sobre Buracos Negros na NASA</a>
+    </article>
+</section>
+<!-- Seção 3: Estrelas -->
+<section id="estrelas">
+    <article>
+        <img src="https://apod.nasa.gov/apod/image/2102/Betelgeuse_Hubble_960.jpg" alt="Estrela Betelgeuse">
+        <h2>Estrelas</h2>
+        <p>Estrelas são enormes esferas de plasma que produzem luz e calor através de fusão nuclear. Betelgeuse, uma gigante vermelha, está próxima do fim de sua vida, e seu brilho avermelhado é visível mesmo a olho nu no céu noturno.</p>
+        <a href="https://www.nasa.gov/mission_pages/hubble/main/index.html" target="_blank">Explore mais sobre Estrelas na NASA</a>
+    </article>
+</section>
+<!-- Seção 4: Planetas -->
+<section id="planetas">
+    <article>
+        <img src="https://apod.nasa.gov/apod/image/1901/Jupiter_NewHorizons_960.jpg" alt="Planeta Júpiter">
+        <h2>Planetas</h2>
+        <p>Planetas são corpos celestes que orbitam estrelas. Júpiter, o maior planeta do nosso Sistema Solar, possui uma atmosfera turbulenta e icônica Grande Mancha Vermelha, uma tempestade gigantesca que dura séculos.</p>
+        <a href="https://solarsystem.nasa.gov/planets/jupiter/overview/" target="_blank">Explore mais sobre Júpiter na NASA</a>
+    </article>
+</section>
+<!-- Seção 5: Nebulosas -->
+<section id="nebulosas">
+    <article>
+        <img src="https://apod.nasa.gov/apod/image/2006/NGC6302_Hubble_960.jpg" alt="Nebulosa NGC 6302">
+        <h2>Nebulosas</h2>
+        <p>Nebulosas são nuvens de gás e poeira no espaço, muitas vezes locais de nascimento de novas estrelas. A NGC 6302, também chamada de Nebulosa do Cremalheira, exibe cores e formas deslumbrantes que encantam astrônomos e entusiastas.</p>
+        <a href="https://www.nasa.gov/mission_pages/hubble/multimedia/index.html" target="_blank">Explore mais sobre Nebulosas na NASA</a>
+    </article>
+</section>
+<!-- Seção 6: Supernovas -->
+<section id="supernovas">
+    <article>
+        <img src="https://apod.nasa.gov/apod/image/1910/SN2014J_HST_960.jpg" alt="Supernova SN 2014J">
+        <h2>Supernovas</h2>
+        <p>Supernovas são explosões de estrelas no final de suas vidas, liberando energia imensa e elementos químicos essenciais para a vida. A SN 2014J, observada na galáxia M82, é um exemplo de como o cosmos continua evoluindo e se renovando.</p>
+        <a href="https://www.nasa.gov/mission_pages/hubble/main/index.html" target="_blank">Explore mais sobre Supernovas na NASA</a>
+    </article>
+</section>
+<footer>
+    Imagens via NASA e outras fontes públicas
+</footer>
+<!-- Botão de controle da música -->
+<button id="music-control">Pause Música</button>
+<!-- Música de fundo invisível via YouTube -->
+<iframe id="bg-music" width="0" height="0"
+        src="https://www.youtube.com/embed/feoHV5JUbuo?autoplay=1&loop=1&playlist=feoHV5JUbuo&controls=0&mute=0&rel=0&modestbranding=1"
+        frameborder="0"
+        allow="autoplay"
+        allowfullscreen>
+</iframe>
 
-            // Criar a pistola (uma geometria simples)
-            let pistol = createPistol();
-            scene.add(pistol);
+<!-- Script do calendário -->
+<script>
+    function generateCalendar() {
+        const calendar = document.getElementById('calendar');
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth();
+        const today = now.getDate();
 
-            // Criar os alvos (bolinhas azuis)
-            for (let i = 0; i < 5; i++) {
-                let target = createTarget();
-                scene.add(target);
-                targets.push(target);
-            }
+        const monthNames = [
+            "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+            "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+        ];
 
-            // Posicionar a câmera
-            camera.position.z = 5;
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-            // Elementos de HUD (pontuação e contador de balas)
-            let scoreElement = document.createElement('div');
-            scoreElement.style.position = 'absolute';
-            scoreElement.style.top = '10px';
-            scoreElement.style.left = '10px';
-            scoreElement.style.color = 'white';
-            scoreElement.style.fontSize = '20px';
-            document.body.appendChild(scoreElement);
+        let html = `
+            <div class="calendar-header">${monthNames[month]} ${year}</div>
+            <div class="calendar-grid">
+        `;
 
-            let bulletsElement = document.createElement('div');
-            bulletsElement.style.position = 'absolute';
-            bulletsElement.style.top = '40px';
-            bulletsElement.style.left = '10px';
-            bulletsElement.style.color = 'white';
-            bulletsElement.style.fontSize = '20px';
-            document.body.appendChild(bulletsElement);
+        // Dias da semana
+        const dayNames = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+        dayNames.forEach(day => {
+            html += `<div class="calendar-day-name">${day}</div>`;
+        });
 
-            // Detectar movimento do mouse e clicar
-            document.addEventListener('mousemove', onMouseMove, false);
-            document.addEventListener('mousedown', onMouseDown, false);
-            document.addEventListener('keydown', onKeyDown, false);
-            document.addEventListener('keyup', onKeyUp, false);
-
-            animate(scoreElement, bulletsElement);
+        // Dias vazios antes do 1º
+        for (let i = 0; i < firstDay; i++) {
+            html += `<div class="calendar-day empty"></div>`;
         }
 
-        // Função para criar uma pistola simples (Glock 19)
-        function createPistol() {
-            let pistol = new THREE.Group();
-
-            let bodyGeometry = new THREE.BoxGeometry(1, 0.3, 0.2);
-            let bodyMaterial = new THREE.MeshBasicMaterial({ color: 0x333333 });
-            let body = new THREE.Mesh(bodyGeometry, bodyMaterial);
-            body.position.set(0, -0.5, -1);
-            pistol.add(body);
-
-            let barrelGeometry = new THREE.CylinderGeometry(0.05, 0.05, 0.8);
-            let barrelMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
-            let barrel = new THREE.Mesh(barrelGeometry, barrelMaterial);
-            barrel.position.set(0, 0, -1.5);
-            barrel.rotation.x = Math.PI / 2;
-            pistol.add(barrel);
-
-            return pistol;
+        // Dias do mês
+        for (let day = 1; day <= daysInMonth; day++) {
+            const isToday = (day === today) ? 'today' : '';
+            html += `<div class="calendar-day ${isToday}">${day}</div>`;
         }
 
-        // Função para criar um alvo (bolinha azul)
-        function createTarget() {
-            let geometry = new THREE.SphereGeometry(0.5, 32, 32);
-            let material = new THREE.MeshBasicMaterial({ color: 0x0000ff });
-            let target = new THREE.Mesh(geometry, material);
-            
-            // Posicionamento aleatório do alvo na cena
-            target.position.set(
-                Math.random() * 10 - 5, 
-                Math.random() * 10 - 5, 
-                Math.random() * 10 - 5
-            );
-            target.isTarget = true; // Marca como alvo
-            target.movementDirection = Math.random() > 0.5 ? 1 : -1; // Direção aleatória (esquerda ou direita)
-            return target;
+        html += `</div>`;
+        calendar.innerHTML = html;
+    }
+
+    // Gerar calendário ao carregar a página
+    window.addEventListener('load', generateCalendar);
+</script>
+
+<!-- Controle da música -->
+<script>
+    // Controle da música
+    const musicControl = document.getElementById('music-control');
+    let musicPlaying = true;
+    musicControl.addEventListener('click', () => {
+        const iframe = document.getElementById('bg-music');
+        if (musicPlaying) {
+            iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+            musicControl.textContent = "Tocar Música";
+        } else {
+            iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+            musicControl.textContent = "Pause Música";
         }
+        musicPlaying = !musicPlaying;
+    });
+    // Adiciona API do YouTube para controlar o player
+    var tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    document.body.appendChild(tag);
+</script>
 
-        // Função de animação (loop)
-        function animate(scoreElement, bulletsElement) {
-            requestAnimationFrame(() => animate(scoreElement, bulletsElement));
-
-            let delta = clock.getDelta(); // tempo entre frames
-
-            // Atualiza a posição da câmera com suavização
-            camera.position.x += (targetCameraPos.x - camera.position.x) * movementSmoothness;
-            camera.position.y += (targetCameraPos.y - camera.position.y) * movementSmoothness;
-            camera.position.z += (targetCameraPos.z - camera.position.z) * movementSmoothness;
-
-            // Atualizar a rotação da câmera com suavização
-            camera.rotation.x += (targetCameraRotation.x - camera.rotation.x) * movementSmoothness;
-            camera.rotation.y += (targetCameraRotation.y - camera.rotation.y) * movementSmoothness;
-
-            // Movimentar os alvos de um lado para o outro
-            targets.forEach(target => {
-                target.position.x += target.movementDirection * targetSpeed;
-                if (Math.abs(target.position.x) > 10) {
-                    target.movementDirection *= -1; // Muda a direção quando atingir a borda
-                }
-            });
-
-            // Atualiza a pontuação
-            scoreElement.innerHTML = 'Pontuação: ' + score;
-
-            // Atualiza o contador de balas
-            bulletsElement.innerHTML = 'Balas: ' + bulletsLeft;
-
-            // Atualiza a cena
-            renderer.render(scene, camera);
-        }
-
-        // Movimentação do mouse (controle da direção da câmera)
-        let mouseX = 0;
-        let mouseY = 0;
-        let targetCameraPos = { x: camera.position.x, y: camera.position.y, z: camera.position.z };
-        let targetCameraRotation = { x: camera.rotation.x, y: camera.rotation.y };
-        
-        function onMouseMove(event) {
-            mouseX = (event.clientX / window.innerWidth) * 2 - 1;
-            mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
-            targetCameraRotation.x = mouseY * Math.PI;
-            targetCameraRotation.y = -mouseX * Math.PI; // Inverte a rotação da câmera
-        }
-
-        // Detecta o clique com o botão direito do mouse para "atirar"
-        function onMouseDown(event) {
-            if (event.button === 2 && bulletsLeft > 0) { // Botão direito do mouse
-                bulletsLeft--;
-                targets.forEach((target, index) => {
-                    if (isTargetInCrosshairs(target)) {
-                        target.visible = false; // Remove o alvo
-                        score++; // Incrementa a pontuação
-                    }
-                });
-            }
-        }
-
-        // Verifica se o alvo está no ponto de mira
-        function isTargetInCrosshairs(target) {
-            let targetPosition = target.position.clone().project(camera);
-            return Math.abs(targetPosition.x) < 0.1 && Math.abs(targetPosition.y) < 0.1;
-        }
-
-        // Controle de teclas pressionadas
-        let keyState = {};
-        function onKeyDown(event) {
-            keyState[event.key] = true;
-        }
-
-        function onKeyUp(event) {
-            keyState[event.key] = false;
-        }
-
-        // Inicializa o jogo
-        init();
-    </script>
+<!-- Cursor interativo -->
+<div class="cursor-neon" id="cursor"></div>
+<script>
+    const cursor = document.getElementById("cursor");
+    document.addEventListener("mousemove", e => {
+        cursor.style.left = e.clientX + "px";
+        cursor.style.top = e.clientY + "px";
+    });
+</script>
 </body>
 </html>
